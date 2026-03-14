@@ -33,29 +33,29 @@ CREATE TABLE IF NOT EXISTS `tifosi`.`boisson` (
 CREATE TABLE IF NOT EXISTS `tifosi`.`ingredient` (
     `id_ingredient` INT NOT NULL AUTO_INCREMENT,
     `nom_ingredient` VARCHAR(50) NOT NULL,
-    `quantite_ingredient` INT NOT NULL,
+    `quantite_ingredient` INT NOT NULL CHECK (quantite_ingredient >= 0),
     PRIMARY KEY (id_ingredient)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `tifosi`.`foccacia` (
     `id_foccacia` INT NOT NULL AUTO_INCREMENT,
     `nom_foccacia` VARCHAR(50) NOT NULL,
-    `prix_foccacia` DECIMAL(5,2) NOT NULL,
+    `prix_foccacia` DECIMAL(5,2) NOT NULL CHECK (prix_foccacia > 0),
     PRIMARY KEY (id_foccacia)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `tifosi`.`client` (
     `id_client` INT NOT NULL AUTO_INCREMENT,
     `nom_client` VARCHAR(50) NOT NULL,
-    `email_client` VARCHAR(150) NOT NULL,
-    `code_postal_client` INT NOT NULL,
+    `email_client` VARCHAR(150) NOT NULL UNIQUE,
+    `code_postal_client` VARCHAR(5) NOT NULL CHECK (code_postal_client REGEXP '^[0-9]{5}$'),
     PRIMARY KEY (id_client)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `tifosi`.`menu` (
     `id_menu` INT NOT NULL AUTO_INCREMENT,
     `nom_menu` VARCHAR(50) NOT NULL,
-    `prix_menu` DECIMAL(5,2) NOT NULL,
+    `prix_menu` DECIMAL(5,2) NOT NULL CHECK (prix_menu >= 0),
     `id_foccacia` INT NOT NULL,
     `id_boisson` INT,
     PRIMARY KEY (id_menu),
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `tifosi`.`achete` (
 CREATE TABLE IF NOT EXISTS `tifosi`.`comprend` (
     `id_foccacia` INT NOT NULL,
     `id_ingredient` INT NOT NULL,
-    `quantite_special_ingredient` INT,
+    `quantite_special_ingredient` INT CHECK (quantite_special_ingredient > 0),
     PRIMARY KEY (id_foccacia, id_ingredient),
     FOREIGN KEY (id_foccacia) REFERENCES foccacia(id_foccacia),
     FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
