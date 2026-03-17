@@ -1,5 +1,6 @@
 /* 1. Afficher la liste des noms des focaccias par ordre alphabétique croissant */
-SELECT nom_foccacia FROM `foccacia` ORDER BY nom_foccacia;
+SELECT nom_foccacia FROM `foccacia` 
+ORDER BY nom_foccacia;
 
 /* 
 Résultat attendu : 
@@ -21,7 +22,7 @@ Commentaire :
 */
 
 /* 2. Afficher le nombre total d'ingrédients */
-SELECT COUNT(id_ingredient) AS `nbr_total_ingredient` FROM ingredient;
+SELECT COUNT(id_ingredient) AS `nbr_total_ingredient` FROM `ingredient`;
 
 /* 
 Résultat attendu : 
@@ -36,7 +37,7 @@ Commentaire :
 */
 
 /* 3. Afficher le prix moyen des focaccias */
-SELECT CAST(AVG(prix_foccacia) AS DECIMAL(5,2)) AS `prix_moyen_foccacia` FROM foccacia;
+SELECT CAST(AVG(prix_foccacia) AS DECIMAL(5,2)) AS `prix_moyen_foccacia` FROM `foccacia`;
 
 /* 
 Résultat attendu : 
@@ -51,11 +52,7 @@ Commentaire :
 */
 
 /* 4. Afficher la liste des boissons avec leur marque, triée par nom de boisson */
-SELECT
-    boisson.nom_boisson,
-    marque.nom_marque
-FROM
-    boisson
+SELECT boisson.nom_boisson, marque.nom_marque FROM `boisson`
 INNER JOIN marque ON(
         boisson.id_marque = marque.id_marque
     )
@@ -86,11 +83,7 @@ Commentaire :
 */
 
 /* 5. Afficher la liste des ingrédients pour une Raclaccia */
-SELECT
-    foccacia.nom_foccacia,
-    ingredient.nom_ingredient
-FROM
-    `comprend`
+SELECT ingredient.nom_ingredient FROM `comprend`
 INNER JOIN foccacia ON(
         comprend.id_foccacia = foccacia.id_foccacia
     )
@@ -98,22 +91,22 @@ INNER JOIN ingredient ON(
         comprend.id_ingredient = ingredient.id_ingredient
     )
 WHERE
-    comprend.id_foccacia = 3;
+    comprend.id_foccacia = 3; -- 3 = Raclaccia
 
 /* 
 Résultat attendu : 
     Une liste a deux colonnes avec le nom de la foccacia Raclaccia et les noms des ingrédients associés
 
 Résultat obtenue : 
-    nom_foccacia	nom_ingredient	
-    Raclaccia	    Ail	
-    Raclaccia	    Base Tomate	
-    Raclaccia	    Champignon	
-    Raclaccia	    Cresson	
-    Raclaccia	    Oignon	
-    Raclaccia	    Parmesan	
-    Raclaccia	    Poivre	
-    Raclaccia	    Raclette	
+    nom_ingredient	
+    Ail	
+    Base Tomate	
+    Champignon	
+    Cresson	
+    Oignon	
+    Parmesan	
+    Poivre	
+    Raclette	
 
 Commentaire : 
     Avec la double utilisation de la fonction INNER JOIN permet de faire le lien entre les trois tables par rapport a " id_faccica " d'un coté et " id_ingredient " de l'autre
@@ -121,11 +114,8 @@ Commentaire :
 
 
 /* 6. Afficher le nom et le nombre d'ingrédients pour chaque foccacia, */
-SELECT
-    foccacia.nom_foccacia,
-    COUNT(comprend.id_ingredient) AS `nbr_total_ingredient`
-FROM
-    `comprend`
+SELECT foccacia.nom_foccacia, COUNT(comprend.id_ingredient) AS `nbr_total_ingredient`
+FROM `comprend`
 INNER JOIN foccacia ON(
         comprend.id_foccacia = foccacia.id_foccacia
     )
@@ -153,10 +143,7 @@ Commentaire :
 
 
 /* 7. Afficher le nom de la focaccia qui a le plus d'ingrédients */
-SELECT
-    foccacia.nom_foccacia
-FROM
-    `comprend`
+SELECT foccacia.nom_foccacia FROM `comprend`
 INNER JOIN foccacia ON
     (
         comprend.id_foccacia = foccacia.id_foccacia
@@ -170,7 +157,7 @@ LIMIT 1;
 
 /*
 Résultat attendu : 
-    Une liste a deux colonnes avec le nom de chaque foccacia et le nombre d'ingredient pour chacune
+    Une liste avec le nom de la foccacia qui a le plus d'ingrédients
 
 Résultat obtenue : 
     nom_foccacia
@@ -180,3 +167,77 @@ Commentaire :
     En faisant trier par nombre d'ingrients et concerver que le 1er de la liste il nous reste que la foccasia en tête de liste
 */	
 
+/* 8. Afficher la liste des focaccia qui contiennent de l'ail */
+SELECT foccacia.nom_foccacia FROM `comprend`
+INNER JOIN foccacia ON
+    (
+        comprend.id_foccacia = foccacia.id_foccacia
+    )
+WHERE
+    comprend.id_ingredient = 1; -- 1 = Ail
+
+/*
+Résultat attendu : 
+    Une liste  avec les noms des foccacias qui a utilise de l'ail
+
+Résultat obtenue : 
+    nom_foccacia	
+    Mozaccia	
+    Gorgonzollaccia	
+    Raclaccia	
+    Paysanne
+
+Commentaire : 
+    En faisant trier par nombre d'ingrients et concerver que le 1er de la liste il nous reste que la foccasia en tête de liste
+*/
+
+/* 9. Afficher la liste des ingrédients inutilisés */
+SELECT ingredient.nom_ingredient FROM `ingredient`
+WHERE NOT EXISTS (
+    SELECT
+        1
+    FROM
+        comprend
+    WHERE
+        comprend.id_ingredient = ingredient.id_ingredient
+);
+
+/*
+Résultat attendu : 
+    Une liste  avec les noms des ingredients qui ne sont pas utilisés
+
+Résultat obtenue : 
+    nom_ingredient	
+    Salami	
+    Tomate cerise
+
+Commentaire : 
+    En partant de la liste des ingrédients et en excluant les ingredients présent dans la liste comprend cela donne les ingredients non utilisé.
+*/
+
+
+/* 10. Afficher la liste des focaccia qui n'ont pas de champignons */
+SELECT foccacia.nom_foccacia FROM `foccacia`
+WHERE NOT EXISTS (
+    SELECT 
+        1
+    FROM 
+        comprend
+    WHERE 
+        comprend.id_foccacia = foccacia.id_foccacia
+      AND 
+        comprend.id_ingredient = 7 -- 7 = Champignon
+);
+
+/*
+Résultat attendu : 
+    Une liste  avec les noms des foccacias qui n'ont pas de champignons
+
+Résultat obtenue : 
+    nom_foccacia	
+    Hawaienne	
+    Américaine
+
+Commentaire : 
+    Dans le condition de résultat l'utilisation de NOT EXISTS exclus les foccacias qui ne remplisse pas les conditions de la recherche
+*/
